@@ -2,4 +2,4 @@
 .DS_Store
 
 #ignore API Firebase
-server/TransitEase Service Account.jason
+server/TransitEase.jason
