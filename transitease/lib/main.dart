@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'pages/login.dart';
 import 'pages/signup.dart';
+import 'pages/mapcontroller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +21,7 @@ class MyApp extends StatelessWidget {
       home: LoginScreen(), // Starting screen
       routes: {
         '/login': (context) => LoginScreen(),
+        '/map': (context) => const OpenStreetMapPage(),
         '/signup': (context) => SignupScreen(),
       },
     );
