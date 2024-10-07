@@ -3,6 +3,5 @@
 
 #ignore API Firebase
 server/TransitEase.json
-
-#ignore python venv
 server/.server
+server/.env
