@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>257482038173-r3k6ougs26ng1pfo3q66d5ei6pms1nqu.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.257482038173-r3k6ougs26ng1pfo3q66d5ei6pms1nqu</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBGKDPm5m3E03mjnZg-nAei7b9Tl_yGzpA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>257482038173</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.transitease</string>
+	<key>PROJECT_ID</key>
+	<string>transitease-db5ab</string>
+	<key>STORAGE_BUCKET</key>
+	<string>transitease-db5ab.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:257482038173:ios:cbb9ff6bbdcacd4b75ad74</string>
+</dict>
+</plist>
