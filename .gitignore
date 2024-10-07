@@ -1,2 +1,5 @@
 # Ignore Mac system files
 .DS_Store
+
+#ignore API Firebase
+server/TransitEase Service Account.jason
