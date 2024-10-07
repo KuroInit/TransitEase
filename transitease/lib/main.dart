@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       home: LoginScreen(), // Starting screen
       routes: {
         '/login': (context) => LoginScreen(),
-        '/map': (context) => const OpenStreetMapPage(),
+        '/map': (context) => MapControllerScreen(),
         '/signup': (context) => SignupScreen(),
       },
     );
