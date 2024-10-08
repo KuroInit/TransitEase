@@ -4,7 +4,6 @@ from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
 from collections import defaultdict
 import os
-import json
 
 # Load environment variables from .env file
 load_dotenv()
@@ -21,7 +20,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()  # Create a Firestore client
 
 # List of ppCodes to exclude
-EXCLUDED_PPCODES = ["K0025"]  # Add ppCodes you want to exclude here
+EXCLUDED_PPCODES = ["K0025"]
 
 
 def fetch_ura_data():
