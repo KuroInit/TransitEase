@@ -4,26 +4,38 @@ from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
 from collections import defaultdict
 import os
+import pyproj
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Read from environment variables
-ACCESS_KEY = os.getenv("URA_ACCESS_KEY")  # Access key from .env
-TOKEN = os.getenv("URA_TOKEN")  # Token from .env
-FIREBASE_CREDENTIALS_JSON = os.getenv("FIREBASE_JSON")  # Path to Firebase credentials
+ACCESS_KEY = os.getenv("URA_ACCESS_KEY")
+TOKEN = os.getenv("URA_TOKEN")
+FIREBASE_CREDENTIALS_JSON = os.getenv("FIREBASE_JSON")
 
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate(FIREBASE_CREDENTIALS_JSON)
 firebase_admin.initialize_app(cred)
-# Initialize Firestore
 db = firestore.client()  # Create a Firestore client
 
 # List of ppCodes to exclude
 EXCLUDED_PPCODES = ["K0025"]
 
+# Define SVY21 and WGS84 coordinate systems
+svy21 = pyproj.Proj(
+    "+proj=tmerc +lat_0=1.366666 +lon_0=103.833333 +k=1 +x_0=28001.642 +y_0=38744.572 +ellps=WGS84 +units=m +no_defs"
+)
+wgs84 = pyproj.Proj(proj='latlong', datum='WGS84')
 
-def fetch_ura_data():
+
+def fetch_ura_data() -> dict:
+    """Fetch data from the URA API."""
     url = "https://www.ura.gov.sg/uraDataService/invokeUraDS?service=Car_Park_Details"
     headers = {
         "User-Agent": "curl/8.7.1",
@@ -32,9 +44,24 @@ def fetch_ura_data():
         "Token": TOKEN,
     }
 
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()  # Raise an error for bad responses
-    return response.json()  # Return the JSON response
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raise an error for bad responses
+        return response.json()
+    except requests.RequestException as e:
+        logger.error(f"Error fetching URA data: {e}")
+        return {}
+
+
+def convert_svy21_to_wgs84(svy21_coordinates: list) -> tuple:
+    """Convert SVY21 coordinates to WGS84."""
+    if len(svy21_coordinates) != 2:
+        logger.warning(f"Invalid SVY21 coordinates: {svy21_coordinates}")
+        return None, None
+    
+    easting, northing = svy21_coordinates
+    lon, lat = pyproj.transform(svy21, wgs84, easting, northing)
+    return lon, lat
 
 
 def group_data_by_pp_code(data):
@@ -74,9 +101,26 @@ def group_data_by_pp_code(data):
             grouped_data[pp_code]["ppCode"] = car_park.get("ppCode")
             grouped_data[pp_code]["ppName"] = car_park.get("ppName").strip()
             grouped_data[pp_code]["parkingSystem"] = car_park.get("parkingSystem")
-            grouped_data[pp_code]["geometries"] = {
-                "coordinates": car_park["geometries"][0]["coordinates"]
-            }
+            
+            # Convert SVY21 coordinates to WGS84
+            svy21_coordinates = car_park["geometries"][0]["coordinates"]
+            if svy21_coordinates and isinstance(svy21_coordinates, str):
+                try:
+                    easting_str, northing_str = svy21_coordinates.split(',')
+                    easting = float(easting_str)
+                    northing = float(northing_str)
+                except ValueError:
+                    print(f"Error converting coordinates for ppCode {pp_code}: {svy21_coordinates}")
+                    continue
+
+                # Perform the transformation
+                lon, lat = pyproj.transform(svy21, wgs84, easting, northing)
+                grouped_data[pp_code]["geometries"] = {
+                    "coordinates": [lon, lat]  # Store as [longitude, latitude]
+                }
+            else:
+                print(f"Invalid coordinates format for ppCode {pp_code}.")
+                continue
 
         # Set parkCapacity for the vehicle category (it might be updated for each vehCat)
         grouped_data[pp_code]["vehCat"][veh_cat]["parkCapacity"] = car_park.get(
@@ -100,14 +144,16 @@ def group_data_by_pp_code(data):
     return grouped_data
 
 
-# Function to push grouped data to Firestore
-def push_grouped_data_to_firestore(grouped_data):
-    # Reference to the Firestore collection
+def push_grouped_data_to_firestore(grouped_data: dict):
+    """Push grouped data to Firestore."""
     car_parks_ref = db.collection("car_parks")
 
-    # Iterate over each ppCode group and push to Firestore
     for pp_code, car_park_data in grouped_data.items():
-        car_parks_ref.document(pp_code).set({"carpark": car_park_data})
+        try:
+            car_parks_ref.document(pp_code).set({"carpark": car_park_data})
+            logger.info(f"Successfully pushed data for ppCode: {pp_code}")
+        except Exception as e:
+            logger.error(f"Error pushing data for ppCode {pp_code}: {e}")
 
 
 # Main function to execute the script
@@ -115,21 +161,14 @@ if __name__ == "__main__":
     try:
         # Fetch data from URA API
         ura_data = fetch_ura_data()
-        print(ura_data)
+        logger.info("Data fetched from URA API.")
 
-        # Check if the response has a 'Result' key
         if "Result" in ura_data and isinstance(ura_data["Result"], list):
-            print("Data fetched successfully. Grouping and pushing to Firestore...")
-
-            # Group the data by ppCode
+            logger.info("Grouping and pushing data to Firestore...")
             grouped_data = group_data_by_pp_code(ura_data["Result"])
-
-            # Push the grouped data to Firestore
             push_grouped_data_to_firestore(grouped_data)
-
-            print("Data pushed to Firestore successfully.")
+            logger.info("Data pushed to Firestore successfully.")
         else:
-            print("No car park data found in the response.")
-
+            logger.warning("No car park data found in the response.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.error(f"An unexpected error occurred: {e}")
