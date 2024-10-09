@@ -2,6 +2,9 @@
 .DS_Store
 *.env
 
+#ignore testing files
+output.txt
+
 #ignore API Firebase
 server/TransitEase.json
 server/.server
