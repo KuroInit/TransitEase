@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'home_screen.dart';
 import 'sign_up_screen.dart';
 import 'dart:async';
+import 'package:transitease/models/models.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -19,18 +20,29 @@ class _LoginScreenState extends State<LoginScreen> {
   String _notificationMessage = "";
   double _progressValue = 1.0;
   Timer? _timer;
+  AppUser? _currentUser;
 
   Future<void> _loginWithEmail() async {
     setState(() {
       _loading = true;
     });
     try {
-      await _auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: _emailController.text, password: _passwordController.text);
+
+      // Get the auth token
+      var authToken = await userCredential.user!.getIdToken();
+
+      // Create the AppUser with the token
+      _currentUser = AppUser.fromFirebaseUser(userCredential.user!, authToken);
+
       _showProgressNotification('Login successful!', Colors.green);
+
       Timer(Duration(seconds: 3), () {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomeScreen()));
+            context,
+            MaterialPageRoute(
+                builder: (context) => HomeScreen(user: _currentUser!)));
       });
     } catch (e) {
       _showProgressNotification('Login failed: $e', Colors.red);
@@ -53,12 +65,21 @@ class _LoginScreenState extends State<LoginScreen> {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      await _auth.signInWithCredential(credential);
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      // Get the auth token
+      var authToken = await userCredential.user!.getIdToken();
+
+      // Create the AppUser with the token
+      _currentUser = AppUser.fromFirebaseUser(userCredential.user!, authToken);
 
       _showProgressNotification('Google sign-in successful!', Colors.green);
       Timer(Duration(seconds: 3), () {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomeScreen()));
+            context,
+            MaterialPageRoute(
+                builder: (context) => HomeScreen(user: _currentUser!)));
       });
     } catch (e) {
       _showProgressNotification('Google sign-in failed: $e', Colors.red);
