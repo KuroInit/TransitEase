@@ -49,5 +49,11 @@
 	<string>We need access to your location to show it on the map.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>We need access to your location to show it on the map.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to save data.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need access to your photo library to add data.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This identifier will be used to deliver personalized ads to you.</string>
 </dict>
 </plist>
