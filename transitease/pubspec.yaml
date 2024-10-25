@@ -47,6 +47,14 @@ dependencies:
   cloud_firestore: ^5.4.4
   shared_preferences: ^2.3.2
   app_tracking_transparency: ^2.0.6
+  flutter_compass: ^0.8.0
+  flutter_map_location_marker: ^9.1.1
+  georange: ^1.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  geoflutterfire_plus: ^0.0.31
+  dart_geohash: ^2.1.0
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:

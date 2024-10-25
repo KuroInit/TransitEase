@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'home_screen.dart';
-import 'sign_up_screen.dart';
 import 'dart:async';
-import 'package:transitease/models/models.dart';
 
-class LoginScreen extends StatefulWidget {
+class SignUpScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -20,69 +16,25 @@ class _LoginScreenState extends State<LoginScreen> {
   String _notificationMessage = "";
   double _progressValue = 1.0;
   Timer? _timer;
-  AppUser? _currentUser;
 
-  Future<void> _loginWithEmail() async {
+  Future<void> _signUp() async {
     setState(() {
       _loading = true;
     });
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      await _auth.createUserWithEmailAndPassword(
           email: _emailController.text, password: _passwordController.text);
-
-      // Get the auth token
-      var authToken = await userCredential.user!.getIdToken();
-
-      // Create the AppUser with the token
-      _currentUser = AppUser.fromFirebaseUser(userCredential.user!, authToken);
-
-      _showProgressNotification('Login successful!', Colors.green);
-
+      _showProgressNotification(
+          'Sign up successful! Please log in.', Colors.green);
       Timer(Duration(seconds: 3), () {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => HomeScreen(user: _currentUser!)));
+        Navigator.pop(context);
       });
     } catch (e) {
-      _showProgressNotification('Login failed: $e', Colors.red);
+      _showProgressNotification('Sign up failed: $e', Colors.red);
     } finally {
       setState(() {
         _loading = false;
       });
-    }
-  }
-
-  Future<void> _loginWithGoogle() async {
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) return; // User canceled sign-in.
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
-
-      // Get the auth token
-      var authToken = await userCredential.user!.getIdToken();
-
-      // Create the AppUser with the token
-      _currentUser = AppUser.fromFirebaseUser(userCredential.user!, authToken);
-
-      _showProgressNotification('Google sign-in successful!', Colors.green);
-      Timer(Duration(seconds: 3), () {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => HomeScreen(user: _currentUser!)));
-      });
-    } catch (e) {
-      _showProgressNotification('Google sign-in failed: $e', Colors.red);
     }
   }
 
@@ -116,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green, // Green background
+      backgroundColor: Colors.green,
       body: Stack(
         children: [
           Center(
@@ -125,7 +77,6 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Email input field
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -141,7 +92,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: Colors.white),
                   ),
                   SizedBox(height: 10),
-                  // Password input field
                   TextField(
                     controller: _passwordController,
                     decoration: InputDecoration(
@@ -158,19 +108,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: Colors.white),
                   ),
                   SizedBox(height: 20),
-                  // Login button
                   _loading
                       ? CircularProgressIndicator()
                       : ElevatedButton(
-                          onPressed: _loginWithEmail,
+                          onPressed: _signUp,
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.green,
-                            backgroundColor: Colors.white, // Text color
+                            backgroundColor: Colors.white,
                           ),
-                          child: Text('Login'),
+                          child: Text('Sign up'),
                         ),
                   SizedBox(height: 20),
-                  // Dividing line
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -192,45 +140,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   SizedBox(height: 20),
-                  // Buttons for Google sign-in and sign-up
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // Sign in with Google button
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _loginWithGoogle,
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                            backgroundColor: Colors.white, // Text color
-                          ),
-                          child: Text('Sign in with Google'),
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      // Sign up button
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SignUpScreen()));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                            backgroundColor: Colors.white, // Text color
-                          ),
-                          child: Text('Sign up'),
-                        ),
-                      ),
-                    ],
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.green,
+                      backgroundColor: Colors.white,
+                    ),
+                    child: Text('Back to Login'),
                   ),
                 ],
               ),
             ),
           ),
-          // Notification Banner
           if (_showNotification)
             Positioned(
               bottom: 20,

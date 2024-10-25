@@ -6,6 +6,7 @@ from collections import defaultdict
 import os
 import pyproj
 import logging
+import geohash2  # Import the geohash library
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +32,7 @@ EXCLUDED_PPCODES = ["K0025"]
 svy21 = pyproj.Proj(
     "+proj=tmerc +lat_0=1.366666 +lon_0=103.833333 +k=1 +x_0=28001.642 +y_0=38744.572 +ellps=WGS84 +units=m +no_defs"
 )
-wgs84 = pyproj.Proj(proj='latlong', datum='WGS84')
+wgs84 = pyproj.Proj(proj="latlong", datum="WGS84")
 
 
 def fetch_ura_data() -> dict:
@@ -58,7 +59,7 @@ def convert_svy21_to_wgs84(svy21_coordinates: list) -> tuple:
     if len(svy21_coordinates) != 2:
         logger.warning(f"Invalid SVY21 coordinates: {svy21_coordinates}")
         return None, None
-    
+
     easting, northing = svy21_coordinates
     lon, lat = pyproj.transform(svy21, wgs84, easting, northing)
     return lon, lat
@@ -71,6 +72,7 @@ def group_data_by_pp_code(data):
             "ppName": None,
             "parkingSystem": None,
             "geometries": None,
+            "geohash": None,  # Add geohash field
             "vehCat": defaultdict(
                 lambda: {
                     "parkCapacity": None,  # Store parkCapacity under each vehCat
@@ -101,16 +103,18 @@ def group_data_by_pp_code(data):
             grouped_data[pp_code]["ppCode"] = car_park.get("ppCode")
             grouped_data[pp_code]["ppName"] = car_park.get("ppName").strip()
             grouped_data[pp_code]["parkingSystem"] = car_park.get("parkingSystem")
-            
+
             # Convert SVY21 coordinates to WGS84
             svy21_coordinates = car_park["geometries"][0]["coordinates"]
             if svy21_coordinates and isinstance(svy21_coordinates, str):
                 try:
-                    easting_str, northing_str = svy21_coordinates.split(',')
+                    easting_str, northing_str = svy21_coordinates.split(",")
                     easting = float(easting_str)
                     northing = float(northing_str)
                 except ValueError:
-                    print(f"Error converting coordinates for ppCode {pp_code}: {svy21_coordinates}")
+                    print(
+                        f"Error converting coordinates for ppCode {pp_code}: {svy21_coordinates}"
+                    )
                     continue
 
                 # Perform the transformation
@@ -118,6 +122,11 @@ def group_data_by_pp_code(data):
                 grouped_data[pp_code]["geometries"] = {
                     "coordinates": [lon, lat]  # Store as [longitude, latitude]
                 }
+
+                # Compute the geohash and add to the grouped data
+                geo_hash = geohash2.encode(lat, lon)
+                grouped_data[pp_code]["geohash"] = geo_hash  # Add the geohash
+
             else:
                 print(f"Invalid coordinates format for ppCode {pp_code}.")
                 continue
@@ -147,13 +156,18 @@ def group_data_by_pp_code(data):
 def push_grouped_data_to_firestore(grouped_data: dict):
     """Push grouped data to Firestore."""
     car_parks_ref = db.collection("car_parks")
+    total_documents = 0  # Counter for the total number of documents
 
     for pp_code, car_park_data in grouped_data.items():
         try:
             car_parks_ref.document(pp_code).set({"carpark": car_park_data})
+            total_documents += 1  # Increment the document count
             logger.info(f"Successfully pushed data for ppCode: {pp_code}")
         except Exception as e:
             logger.error(f"Error pushing data for ppCode {pp_code}: {e}")
+
+    # Log the total number of documents pushed to Firestore
+    logger.info(f"Total documents pushed to Firestore: {total_documents}")
 
 
 # Main function to execute the script

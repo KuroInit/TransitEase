@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:transitease/models/models.dart'; // Import the models file
+import 'package:transitease/models/models.dart';
 
 class BugReportFormUI extends StatefulWidget {
   final AppUser user;
@@ -12,7 +12,7 @@ class BugReportFormUI extends StatefulWidget {
 
 class _BugReportFormUIState extends State<BugReportFormUI> {
   final _descriptionController = TextEditingController();
-  Severity _selectedSeverity = Severity.low; // Default severity
+  Severity _selectedSeverity = Severity.low;
 
   @override
   void dispose() {
@@ -44,7 +44,7 @@ class _BugReportFormUIState extends State<BugReportFormUI> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Bug report submitted successfully!')),
     );
-    Navigator.pop(context); // Close the drawer
+    Navigator.pop(context);
   }
 
   @override

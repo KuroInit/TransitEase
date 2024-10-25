@@ -25,6 +25,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
+  auto_size_text:
+    dependency: "direct main"
+    description:
+      name: auto_size_text
+      sha256: "3f5261cd3fb5f2a9ab4e2fc3fba84fd9fcaac8821f20a1d4e71f557521b22599"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -105,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  dart_geohash:
+    dependency: "direct main"
+    description:
+      name: dart_geohash
+      sha256: c5594c0063ca67f37778b2c7d025d22e2ecd38741c0acd5b0f7596374e3309f2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   fake_async:
     dependency: transitive
     description:
@@ -190,6 +206,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_compass:
+    dependency: "direct main"
+    description:
+      name: flutter_compass
+      sha256: be642484f9f6975c1c6edff568281b001f2f1e604de27ecea18d97eebbdef22f
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.0"
   flutter_dotenv:
     dependency: "direct main"
     description:
@@ -214,6 +238,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.2"
+  flutter_map_location_marker:
+    dependency: "direct main"
+    description:
+      name: flutter_map_location_marker
+      sha256: "1971d9ad7c8bedb15cb6a03598c0a3ad66ac6f7f165ad90d801bd5f636120f38"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.1.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -224,6 +256,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  geoflutterfire_plus:
+    dependency: "direct main"
+    description:
+      name: geoflutterfire_plus
+      sha256: "68261a28c06d1a8f3be14796bf81697d96aff2b465781018203d0e88e716223b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.31"
   geolocator:
     dependency: "direct main"
     description:
@@ -272,6 +312,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.3"
+  georange:
+    dependency: "direct main"
+    description:
+      name: georange
+      sha256: fd16abb25973337afd4288e4174ed371fc8cb531d81198140a43ab6b8ea520af
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   google_identity_services_web:
     dependency: transitive
     description:
@@ -320,6 +368,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.4+2"
+  hive:
+    dependency: "direct main"
+    description:
+      name: hive
+      sha256: "8dcf6db979d7933da8217edcec84e9df1bdb4e4edc7fc77dbd5aa74356d6d941"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.3"
+  hive_flutter:
+    dependency: "direct main"
+    description:
+      name: hive_flutter
+      sha256: dca1da446b1d808a51689fb5d0c6c9510c0a2ba01e22805d492c73b68e33eecc
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   http:
     dependency: "direct main"
     description:
@@ -472,6 +536,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.0"
+  path_provider:
+    dependency: transitive
+    description:
+      name: path_provider
+      sha256: fec0d61223fba3154d87759e3cc27fe2c8dc498f6386c6d6fc80d1afdd1bf378
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.4"
+  path_provider_android:
+    dependency: transitive
+    description:
+      name: path_provider_android
+      sha256: c464428172cb986b758c6d1724c603097febb8fb855aa265aeecc9280c294d4a
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.12"
+  path_provider_foundation:
+    dependency: transitive
+    description:
+      name: path_provider_foundation
+      sha256: f234384a3fdd67f989b4d54a5d73ca2a6c422fa55ae694381ae0f4375cd1ea16
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.0"
   path_provider_linux:
     dependency: transitive
     description:
@@ -576,6 +664,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      sha256: "5c3004a4a8dbb94bd4bf5412a4def4acdaa12e12f269737a5751369e12d1a962"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.28.0"
   shared_preferences:
     dependency: "direct main"
     description:

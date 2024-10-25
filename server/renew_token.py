@@ -24,11 +24,8 @@ def make_request():
 
     try:
         response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raise an exception for HTTP errors
 
-        # Raise an exception for HTTP errors
-        response.raise_for_status()
-
-        # Print the response content
         print("Response Status Code:", response.status_code)
         return response
 
@@ -39,12 +36,10 @@ def make_request():
 def write_to_env_file(token):
     env_file_path = ".env"
 
-    # Read the existing .env file
-    lines = []
+    # Access the .env file exclusively and then close it after updating
     with open(env_file_path, "r") as env_file:
         lines = env_file.readlines()
 
-    # Update or add the URA_TOKEN variable
     with open(env_file_path, "w") as env_file:
         for line in lines:
             if line.startswith("URA_TOKEN="):
@@ -56,8 +51,10 @@ def write_to_env_file(token):
 
 
 if __name__ == "__main__":
-
     # Make the GET request
-    response = make_request().json()
-    # Write the new token to the .env file
-    write_to_env_file(response["Result"])
+    response = make_request()
+    if response:
+        response_json = response.json()
+
+        # Write the new token to the .env file
+        write_to_env_file(response_json["Result"])

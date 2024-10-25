@@ -13,8 +13,8 @@ class AppUser {
 
   factory AppUser.fromFirebaseUser(User firebaseUser, String? authToken) {
     return AppUser(
-      userID: firebaseUser.email ?? '', // Use empty string if email is null
-      authToken: authToken ?? '', // Use empty string if authToken is null
+      userID: firebaseUser.email ?? '',
+      authToken: authToken ?? '',
     );
   }
 }
@@ -84,4 +84,18 @@ class Preferences {
     required this.radiusDistance,
     required this.vehicleType,
   });
+}
+
+class DocumentSnapshotMock {
+  final Map<String, dynamic> data;
+
+  DocumentSnapshotMock(this.data);
+
+  Map<String, dynamic> getData() {
+    return data;
+  }
+
+  dynamic operator [](String key) {
+    return data[key];
+  }
 }
