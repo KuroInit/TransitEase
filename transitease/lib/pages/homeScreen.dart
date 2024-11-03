@@ -5,7 +5,6 @@ import 'package:hive/hive.dart';
 import 'package:transitease/models/models.dart';
 import 'bugReportForm.dart';
 import 'preferencesMenu.dart';
-import 'listCarparkScreen.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'loginScreen.dart';
@@ -606,19 +605,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 }
               },
               child: Icon(Icons.settings, color: Colors.black),
-            ),
-          ),
-          Positioned(
-            top: 140,
-            left: 20,
-            child: FloatingActionButton(
-              heroTag: "carParkDrawer",
-              backgroundColor: Colors.white,
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => CarParksScreen()));
-              },
-              child: Icon(Icons.map, color: Colors.black),
             ),
           ),
           Positioned(

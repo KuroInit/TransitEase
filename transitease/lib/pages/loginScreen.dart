@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'homeScreen.dart';
 import 'signUpScreen.dart';
 import 'dart:async';
@@ -48,37 +47,6 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _loading = false;
       });
-    }
-  }
-
-  Future<void> _loginWithGoogle() async {
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) return;
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
-
-      var authToken = await userCredential.user!.getIdToken();
-
-      _currentUser = AppUser.fromFirebaseUser(userCredential.user!, authToken);
-
-      _showProgressNotification('Google sign-in successful!', Colors.green);
-      Timer(Duration(seconds: 3), () {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => HomeScreen(user: _currentUser!)));
-      });
-    } catch (e) {
-      _showProgressNotification('Google sign-in failed: $e', Colors.red);
     }
   }
 
@@ -187,17 +155,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _loginWithGoogle,
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                            backgroundColor: Colors.white,
-                          ),
-                          child: Text('Sign in with Google'),
-                        ),
-                      ),
-                      SizedBox(width: 10),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {

@@ -123,6 +123,8 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                         children: [
                           ChoiceChip(
                             label: Text('Car'),
+                            color: WidgetStatePropertyAll(
+                                Colors.green.withOpacity(0.2)),
                             selected: isCarSelected,
                             onSelected: (selected) {
                               setState(() {
@@ -134,6 +136,8 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                           SizedBox(width: 8),
                           ChoiceChip(
                             label: Text('Motorcycle'),
+                            color: WidgetStatePropertyAll(
+                                Colors.green.withOpacity(0.2)),
                             selected: !isCarSelected,
                             onSelected: (selected) {
                               setState(() {
@@ -162,11 +166,16 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () => _selectDateTime(context, true),
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  WidgetStatePropertyAll<Color>(Colors.green),
+                            ),
                             child: Text(
                               selectedStartTime == null
                                   ? 'Select Start Time'
                                   : DateFormat('yyyy-MM-dd HH:mm')
                                       .format(selectedStartTime!),
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
                           SizedBox(height: 8),
@@ -176,11 +185,16 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () => _selectDateTime(context, false),
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  WidgetStatePropertyAll<Color>(Colors.green),
+                            ),
                             child: Text(
                               selectedEndTime == null
                                   ? 'Select End Time'
                                   : DateFormat('yyyy-MM-dd HH:mm')
                                       .format(selectedEndTime!),
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
                         ],
@@ -191,7 +205,14 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                                 selectedTimeSlots.isEmpty
                             ? null
                             : () => _calculatePrice(selectedTimeSlots!),
-                        child: Text('Calculate Price'),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              WidgetStatePropertyAll<Color>(Colors.green),
+                        ),
+                        child: Text(
+                          'Calculate Price',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                       SizedBox(height: 10),
                       if (calculatedPrice != null)

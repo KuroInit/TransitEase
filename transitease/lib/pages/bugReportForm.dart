@@ -33,7 +33,6 @@ class _BugReportFormUIState extends State<BugReportFormUI> {
     }
 
     try {
-      // Push bug report to Firestore
       await FirebaseFirestore.instance
           .collection('bugreports')
           .doc('reports_$bugReportID')
@@ -102,7 +101,15 @@ class _BugReportFormUIState extends State<BugReportFormUI> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _submitBugReport,
-              child: Text('Submit Bug Report'),
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll<Color>(Colors.green),
+              ),
+              child: Text(
+                'Submit Bug Report',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
             ),
           ],
         ),
