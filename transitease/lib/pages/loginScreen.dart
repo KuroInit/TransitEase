@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _progressValue = 1.0;
     });
 
-    _timer = Timer.periodic(Duration(milliseconds: 500), (Timer timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 80), (Timer timer) {
       setState(() {
         _progressValue -= 0.02;
         if (_progressValue <= 0.0) {

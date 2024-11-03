@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:transitease/models/models.dart';
 
 class BugReportFormUI extends StatefulWidget {
@@ -20,7 +21,7 @@ class _BugReportFormUIState extends State<BugReportFormUI> {
     super.dispose();
   }
 
-  void _submitBugReport() {
+  Future<void> _submitBugReport() async {
     final String bugReportID = DateTime.now().millisecondsSinceEpoch.toString();
     final String description = _descriptionController.text;
 
@@ -31,20 +32,29 @@ class _BugReportFormUIState extends State<BugReportFormUI> {
       return;
     }
 
-    BugReport bugReport = BugReport(
-      bugReportID: bugReportID,
-      userID: widget.user,
-      description: description,
-      severity: _selectedSeverity,
-    );
+    try {
+      // Push bug report to Firestore
+      await FirebaseFirestore.instance
+          .collection('bugreports')
+          .doc('reports_$bugReportID')
+          .set({
+        'user_email': widget.user.userID,
+        'severity': _selectedSeverity.toString().split('.').last,
+        'description': description,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
-    print(
-        'Bug Report Submitted: ${bugReport.description}, Severity: ${bugReport.severity}');
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Bug report submitted successfully!')),
-    );
-    Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Bug report submitted successfully!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      print("Error submitting bug report: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Failed to submit bug report. Please try again.')),
+      );
+    }
   }
 
   @override

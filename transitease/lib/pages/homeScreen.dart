@@ -45,8 +45,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     vehicleType: VehicleType.car,
   );
 
-  Key _mapKey = UniqueKey();
-
   @override
   void initState() {
     super.initState();
@@ -197,7 +195,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         setState(() {
           sortedCarParks = carParksWithinRadius;
-          print("Sorted Car Parks within radius: $sortedCarParks");
         });
       } catch (e) {
         print("Error while sorting car parks: $e");
@@ -205,6 +202,43 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } else {
       print("Location not loaded yet.");
     }
+  }
+
+  void _updateMarkers() async {
+    List<DocumentSnapshot> nearbyCarParks = await queryGeohashesWithinRadius(
+      _userLocation.latitude,
+      _userLocation.longitude,
+      _preferences.radiusDistance,
+    );
+
+    List<Map<String, dynamic>> newCarParks = nearbyCarParks.map((doc) {
+      var carParkData = doc['carpark'];
+      return {
+        'id': doc.id,
+        'geohash': carParkData['geohash'],
+      };
+    }).toList();
+
+    newCarParks.sort((a, b) => a['id'].compareTo(b['id']));
+
+    if (!_areCarParksEqual(newCarParks, sortedCarParks)) {
+      setState(() {
+        sortedCarParks = newCarParks;
+        markers = generateMarkers(nearbyCarParks);
+      });
+    }
+  }
+
+  bool _areCarParksEqual(
+      List<Map<String, dynamic>> list1, List<Map<String, dynamic>> list2) {
+    if (list1.length != list2.length) return false;
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i]['id'] != list2[i]['id'] ||
+          list1[i]['geohash'] != list2[i]['geohash']) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void _startListeningToLocationChanges() async {
@@ -222,37 +256,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _positionStreamSubscription = Geolocator.getPositionStream(
       locationSettings: LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
+        distanceFilter: 500,
       ),
     ).listen((Position position) {
-      setState(() {
-        _userLocation = LatLng(position.latitude, position.longitude);
-        _locationLoaded = true;
-        _mapController.move(_userLocation, _currentZoom);
-        _updateMarkers();
-      });
-    });
-  }
+      double distance = _calculateDistance(
+        _userLocation.latitude,
+        _userLocation.longitude,
+        position.latitude,
+        position.longitude,
+      );
 
-  void _updateMarkers() async {
-    List<DocumentSnapshot> nearbyCarParks = await queryGeohashesWithinRadius(
-      _userLocation.latitude,
-      _userLocation.longitude,
-      _preferences.radiusDistance,
-    );
-
-    setState(() {
-      List<Map<String, dynamic>> carParks = nearbyCarParks.map((doc) {
-        var carParkData = doc['carpark'];
-        return {
-          'id': doc.id,
-          'geohash': carParkData['geohash'],
-        };
-      }).toList();
-
-      _sortCarParksByDistanceWithinRadius(carParks);
-      markers = generateMarkers(nearbyCarParks);
-      _mapKey = UniqueKey();
+      if (distance >= 0.5) {
+        setState(() {
+          _userLocation = LatLng(position.latitude, position.longitude);
+          _locationLoaded = true;
+          _mapController.move(_userLocation, _currentZoom);
+          _updateMarkers();
+        });
+      }
     });
   }
 
@@ -317,7 +338,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       body: Stack(
         children: [
           FlutterMap(
-            key: _mapKey,
             mapController: _mapController,
             options: MapOptions(
               initialCenter: _locationLoaded
@@ -328,19 +348,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.app',
+                userAgentPackageName: 'com.example.transitease',
               ),
               CurrentLocationLayer(
-                alignPositionOnUpdate: AlignOnUpdate.always,
                 style: LocationMarkerStyle(
                   marker: DefaultLocationMarker(
-                    color: Colors.blue,
-                    child: Icon(
-                      Icons.navigation,
-                      color: Colors.white,
-                    ),
+                    color: Colors.green,
                   ),
-                  markerSize: Size(80, 80),
+                  markerSize: Size(15, 15),
                   accuracyCircleColor: Colors.blue.withOpacity(0.2),
                 ),
               ),
