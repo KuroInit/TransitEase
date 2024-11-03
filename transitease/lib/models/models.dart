@@ -35,7 +35,8 @@ class Carpark {
   final String carparkID;
   final String name;
   final LatLng locationCoordinates;
-  final int capacity;
+  final int carCapacity;
+  final int bikeCapacity;
   final int currentOccupancy;
   final double pricePerHour;
   final bool realTimeAvailability;
@@ -44,7 +45,8 @@ class Carpark {
     required this.carparkID,
     required this.name,
     required this.locationCoordinates,
-    required this.capacity,
+    required this.carCapacity,
+    required this.bikeCapacity,
     required this.currentOccupancy,
     required this.pricePerHour,
     required this.realTimeAvailability,

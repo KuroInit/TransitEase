@@ -18,6 +18,8 @@ import 'dart:async';
 import 'dart:math';
 import 'package:dart_geohash/dart_geohash.dart';
 import 'carParkDetails.dart';
+import 'carParkDetailsScreen.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class HomeScreen extends StatefulWidget {
   final AppUser user;
@@ -44,6 +46,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     radiusDistance: 1000,
     vehicleType: VehicleType.car,
   );
+
+  // ItemScrollController for scrolling to list items
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
+
+  // Timestamp for the list view data
+  DateTime? _listViewDataFetchedTime;
 
   @override
   void initState() {
@@ -131,6 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return {
         'id': doc.id,
         'geohash': carParkData['geohash'],
+        'name': carParkData['ppName'] ?? 'Unnamed Car Park',
       };
     }).toList();
 
@@ -195,6 +206,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         setState(() {
           sortedCarParks = carParksWithinRadius;
+          _listViewDataFetchedTime = DateTime.now(); // Update the timestamp
         });
       } catch (e) {
         print("Error while sorting car parks: $e");
@@ -216,6 +228,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return {
         'id': doc.id,
         'geohash': carParkData['geohash'],
+        'name': carParkData['ppName'] ?? 'Unnamed Car Park',
       };
     }).toList();
 
@@ -224,7 +237,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!_areCarParksEqual(newCarParks, sortedCarParks)) {
       setState(() {
         sortedCarParks = newCarParks;
-        markers = generateMarkers(nearbyCarParks);
+        markers = generateMarkersWithOnTap(nearbyCarParks, _onMarkerTap);
+        _listViewDataFetchedTime = DateTime.now(); // Update the timestamp
       });
     }
   }
@@ -329,6 +343,74 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
+  void _recenterMap() {
+    if (_locationLoaded) {
+      _mapController.move(_userLocation, _currentZoom);
+    }
+  }
+
+  void _onMarkerTap(String carParkId) {
+    // Find the index of the car park in the sorted list
+    int index =
+        sortedCarParks.indexWhere((carPark) => carPark['id'] == carParkId);
+
+    if (index != -1) {
+      GeoHasher geohash = GeoHasher();
+      var decodedLocation = geohash.decode(sortedCarParks[index]['geohash']);
+      LatLng carParkLocation = LatLng(decodedLocation[1], decodedLocation[0]);
+
+      // Scroll to the corresponding item and open details screen
+      _navigateToCarParkDetails(carParkId, carParkLocation, index);
+    }
+  }
+
+  void _navigateToCarParkDetails(
+      String carParkId, LatLng carParkLocation, int index) {
+    // Navigate to the details screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CarParkDetailScreen(
+          carParkId: carParkId,
+          carParkLocation: carParkLocation,
+          vehPref: _preferences,
+        ),
+      ),
+    );
+
+    // Optionally, center the map on the car park
+    _mapController.move(carParkLocation, 18.0);
+
+    // Scroll to the item in the list
+    _itemScrollController.scrollTo(
+      index: index,
+      duration: Duration(milliseconds: 500),
+      alignment: 0.5, // Center the item in the list
+    );
+  }
+
+  Future<void> _refreshListView() async {
+    // Implement any data fetching or refreshing logic here
+    _updateMarkers();
+    setState(() {
+      _listViewDataFetchedTime = DateTime.now();
+    });
+  }
+
+  String _formatTimeDifference(DateTime timestamp) {
+    final Duration difference = DateTime.now().difference(timestamp);
+
+    if (difference.inSeconds < 60) {
+      return 'Data updated just now';
+    } else if (difference.inMinutes < 60) {
+      return 'Data updated ${difference.inMinutes} minutes ago';
+    } else if (difference.inHours < 24) {
+      return 'Data updated ${difference.inHours} hours ago';
+    } else {
+      return 'Data updated ${difference.inDays} days ago';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -355,8 +437,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   marker: DefaultLocationMarker(
                     color: Colors.green,
                   ),
-                  markerSize: Size(15, 15),
-                  accuracyCircleColor: Colors.blue.withOpacity(0.2),
+                  markerSize: Size(25, 25),
+                  accuracyCircleColor: Colors.green.withOpacity(0.2),
+                  headingSectorRadius: 6.5,
                 ),
               ),
               MarkerLayer(markers: markers),
@@ -382,6 +465,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     icon: Icon(Icons.remove, color: Colors.black),
                     onPressed: _zoomOut,
                   ),
+                  Divider(height: 1, thickness: 1, color: Colors.grey),
+                  IconButton(
+                    icon: Icon(Icons.my_location, color: Colors.green),
+                    onPressed: _recenterMap,
+                  ),
                 ],
               ),
             ),
@@ -390,57 +478,107 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             bottom: 30,
             left: 10,
             right: 10,
-            child: SizedBox(
-              height: 300,
-              child: sortedCarParks.isEmpty
-                  ? Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(0, 255, 255, 255),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 6,
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          'No car parks in the area',
+            child: Container(
+              height: 320,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _listViewDataFetchedTime != null
+                              ? _formatTimeDifference(_listViewDataFetchedTime!)
+                              : 'Data not loaded',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 12,
+                            color: Colors.black54,
                           ),
                         ),
-                      ),
-                    )
-                  : ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: sortedCarParks.length,
-                      itemBuilder: (context, index) {
-                        String carParkId = sortedCarParks[index]['id'];
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                          child: Container(
-                            width: 210,
+                        IconButton(
+                          icon: Icon(Icons.refresh, color: Colors.green),
+                          onPressed: _refreshListView,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: sortedCarParks.isEmpty
+                        ? Container(
+                            width: double.infinity,
                             decoration: BoxDecoration(
-                              color: const Color.fromARGB(0, 187, 6, 6),
-                              borderRadius: BorderRadius.circular(16),
+                              color: Colors.white.withOpacity(0),
+                              borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black26,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 4),
+                                  blurRadius: 6,
                                 ),
                               ],
                             ),
-                            child: CarParkDetails(carParkId: carParkId),
+                            child: Center(
+                              child: Text(
+                                'No car parks in the area',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          )
+                        : ScrollablePositionedList.builder(
+                            itemScrollController: _itemScrollController,
+                            itemPositionsListener: _itemPositionsListener,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: sortedCarParks.length,
+                            itemBuilder: (context, index) {
+                              String carParkId = sortedCarParks[index]['id'];
+                              String carParkGeohash =
+                                  sortedCarParks[index]['geohash'];
+                              String carParkName = sortedCarParks[index]
+                                      ['name'] ??
+                                  'Unknown Car Park';
+
+                              // Decode the geohash to get latitude and longitude
+                              GeoHasher geohash = GeoHasher();
+                              var decodedLocation =
+                                  geohash.decode(carParkGeohash);
+                              LatLng carParkLocation = LatLng(
+                                  decodedLocation[1], decodedLocation[0]);
+
+                              return GestureDetector(
+                                onTap: () => _navigateToCarParkDetails(
+                                    carParkId, carParkLocation, index),
+                                child: Container(
+                                  width: 210,
+                                  height: 100,
+                                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 10,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  padding: EdgeInsets.all(10),
+                                  child: CarParkDetails(carParkId: carParkId),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Positioned(

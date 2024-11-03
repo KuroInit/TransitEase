@@ -55,6 +55,7 @@ dependencies:
   geoflutterfire_plus: ^0.0.31
   dart_geohash: ^2.1.0
   auto_size_text: ^3.0.0
+  scrollable_positioned_list: ^0.3.8
 
 dev_dependencies:
   flutter_test:
