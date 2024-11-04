@@ -8,5 +8,5 @@ services:
     volumes:
       - .:/app
       - ./logs:/app/logs  
-      - ./server/.env:/app/.env
+      - ./.env:/app/.env
     restart: always

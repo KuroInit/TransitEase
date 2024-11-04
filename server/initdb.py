@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-dotenv_path = "/app/"
+dotenv_path = "/app/.env"
 
 try:
     if load_dotenv(dotenv_path):

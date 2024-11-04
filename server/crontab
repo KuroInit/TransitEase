@@ -4,4 +4,5 @@
 @reboot sleep 60 && /usr/local/bin/python3 /app/initdb.py >> /app/logs/initdb.log 2>&1
 0 0 * * * /usr/local/bin/python3 /app/initdb.py >> /app/logs/initdb.log 2>&1
 
+@reboot sleep 60 && /usr/local/bin/python3 /app/update_vacancy.py >> /app/logs/update_vacancy.log 2>&1
 */10 * * * * /usr/local/bin/python3 /app/update_vacancy.py >> /app/logs/update_vacancy.log 2>&1
