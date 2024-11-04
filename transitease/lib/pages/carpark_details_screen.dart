@@ -204,7 +204,7 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                         onPressed: selectedTimeSlots == null ||
                                 selectedTimeSlots.isEmpty
                             ? null
-                            : () => _calculatePrice(selectedTimeSlots!),
+                            : () => _calculatePrice(selectedTimeSlots),
                         style: ButtonStyle(
                           backgroundColor:
                               WidgetStatePropertyAll<Color>(Colors.green),

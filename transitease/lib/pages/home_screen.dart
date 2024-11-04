@@ -3,20 +3,20 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:hive/hive.dart';
 import 'package:transitease/models/models.dart';
-import 'bugReportForm.dart';
-import 'preferencesMenu.dart';
+import 'bug_report_form.dart';
+import 'preferences_menu_screen.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'loginScreen.dart';
-import 'geohashQuery.dart';
-import 'mapMarkers.dart';
+import 'login_screen.dart';
+import 'geohash_query.dart';
+import 'map_markers.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'dart:async';
 import 'package:dart_geohash/dart_geohash.dart';
-import 'carParkDetails.dart';
-import 'carParkDetailsScreen.dart';
+import 'carpark_details.dart';
+import 'carpark_details_screen.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -519,9 +519,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               String carParkId = sortedCarParks[index]['id'];
                               String carParkGeohash =
                                   sortedCarParks[index]['geohash'];
-                              String carParkName = sortedCarParks[index]
-                                      ['name'] ??
-                                  'Unknown Car Park';
+                              //String carParkName = sortedCarParks[index]
+                              //        ['name'] ??
+                              //    'Unknown Car Park';
 
                               // Decode the geohash to get latitude and longitude
                               GeoHasher geohash = GeoHasher();
