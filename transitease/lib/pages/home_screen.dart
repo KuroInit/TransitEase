@@ -14,7 +14,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'dart:async';
-import 'dart:math';
 import 'package:dart_geohash/dart_geohash.dart';
 import 'carParkDetails.dart';
 import 'carParkDetailsScreen.dart';
@@ -167,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           double lat = decoded[1];
           double lon = decoded[0];
 
-          double distance = _calculateDistance(
+          double distance = haversineDistance(
             _userLocation.latitude,
             _userLocation.longitude,
             lat,
@@ -187,13 +186,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           double latB = decodedB[1];
           double lonB = decodedB[0];
 
-          double distanceA = _calculateDistance(
+          double distanceA = haversineDistance(
             _userLocation.latitude,
             _userLocation.longitude,
             latA,
             lonA,
           );
-          double distanceB = _calculateDistance(
+          double distanceB = haversineDistance(
             _userLocation.latitude,
             _userLocation.longitude,
             latB,
@@ -272,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         distanceFilter: 500,
       ),
     ).listen((Position position) {
-      double distance = _calculateDistance(
+      double distance = haversineDistance(
         _userLocation.latitude,
         _userLocation.longitude,
         position.latitude,
@@ -288,26 +287,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         });
       }
     });
-  }
-
-  double _calculateDistance(
-      double lat1, double lon1, double lat2, double lon2) {
-    const int earthRadius = 6371;
-
-    double dLat = _deg2rad(lat2 - lat1);
-    double dLon = _deg2rad(lon2 - lon1);
-    double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_deg2rad(lat1)) *
-            cos(_deg2rad(lat2)) *
-            sin(dLon / 2) *
-            sin(dLon / 2);
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    double distance = earthRadius * c;
-    return distance;
-  }
-
-  double _deg2rad(double deg) {
-    return deg * (pi / 180);
   }
 
   Future<void> _trackingPermission() async {
