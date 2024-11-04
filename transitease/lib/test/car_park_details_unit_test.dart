@@ -54,7 +54,7 @@ void main() {
         'carpark': {
           'ppCode': 'TEST01',
           'ppName': 'Test Carpark',
-          'geometries': {}, // Empty geometries
+          'geometries': {},
           'vehCat': {
             'Car': {'parkCapacity': 100},
             'Motorcycle': {'parkCapacity': 50}
@@ -78,10 +78,7 @@ void main() {
           'ppCode': 'TEST01',
           'ppName': 'Test Carpark',
           'geometries': {
-            'coordinates': [
-              null,
-              null
-            ] // Using null values to simulate invalid data
+            'coordinates': [null, null]
           },
           'vehCat': {
             'Car': {'parkCapacity': 100},
@@ -108,10 +105,7 @@ void main() {
           'geometries': {
             'coordinates': [103.8198, 1.3521]
           },
-          'vehCat': {
-            'Car': 'invalid', // Invalid format for car capacity
-            'Motorcycle': 'invalid' // Invalid format for motorcycle capacity
-          },
+          'vehCat': {'Car': 'invalid', 'Motorcycle': 'invalid'},
         },
       };
 
@@ -127,7 +121,6 @@ void main() {
   });
 }
 
-// Helper function to parse Firestore document into Carpark object
 Carpark carparkFromFirestore(DocumentSnapshot doc) {
   final data = doc.data() as Map<String, dynamic>?;
   final carparkData = data?['carpark'] as Map<String, dynamic>?;
@@ -145,7 +138,6 @@ Carpark carparkFromFirestore(DocumentSnapshot doc) {
     );
   }
 
-  // Handle coordinates
   List<dynamic>? coordinates =
       carparkData['geometries']?['coordinates'] as List<dynamic>?;
 
@@ -156,7 +148,6 @@ Carpark carparkFromFirestore(DocumentSnapshot doc) {
     longitude = coordinates[0] is num ? (coordinates[0] as num).toDouble() : 0;
   }
 
-  // Handle vehicle capacities
   int carCapacity = 0;
   int motorcycleCapacity = 0;
 
@@ -171,9 +162,7 @@ Carpark carparkFromFirestore(DocumentSnapshot doc) {
     if (motorcycleData != null && motorcycleData['parkCapacity'] is int) {
       motorcycleCapacity = motorcycleData['parkCapacity'] as int;
     }
-  } catch (e) {
-    // If there's any error parsing the capacity data, keep the default values of 0
-  }
+  } catch (e) {}
 
   return Carpark(
     carparkID: carparkData['ppCode'] ?? 'Unavailable',
