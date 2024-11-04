@@ -126,6 +126,7 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                           ChoiceChip(
                             label: Text('Car'),
                             selected: isCarSelected,
+                            selectedColor: Colors.green,
                             onSelected: (selected) {
                               setState(() {
                                 isCarSelected = true;
@@ -137,6 +138,7 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                           ChoiceChip(
                             label: Text('Motorcycle'),
                             selected: !isCarSelected,
+                            selectedColor: Colors.green,
                             onSelected: (selected) {
                               setState(() {
                                 isCarSelected = false;
@@ -169,6 +171,9 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                                   ? 'Select Start Time'
                                   : DateFormat('yyyy-MM-dd HH:mm')
                                       .format(selectedStartTime!),
+                              style: TextStyle(
+                                  color:
+                                      const Color.fromARGB(255, 50, 116, 53)),
                             ),
                           ),
                           SizedBox(height: 8),
@@ -179,11 +184,13 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                           ElevatedButton(
                             onPressed: () => _selectDateTime(context, false),
                             child: Text(
-                              selectedEndTime == null
-                                  ? 'Select End Time'
-                                  : DateFormat('yyyy-MM-dd HH:mm')
-                                      .format(selectedEndTime!),
-                            ),
+                                selectedEndTime == null
+                                    ? 'Select End Time'
+                                    : DateFormat('yyyy-MM-dd HH:mm')
+                                        .format(selectedEndTime!),
+                                style: TextStyle(
+                                    color: const Color.fromARGB(
+                                        255, 50, 116, 53))),
                           ),
                         ],
                       ),
@@ -194,10 +201,16 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                             ? null
                             : () => _calculatePrice(selectedTimeSlots),
                         child: Text(
-                          selectedTimeSlots == null || selectedTimeSlots.isEmpty
-                              ? 'No Slots Available'
-                              : "Calculate Cost",
-                        ),
+                            selectedTimeSlots == null ||
+                                    selectedTimeSlots.isEmpty
+                                ? 'No Slots Available'
+                                : "Calculate Cost",
+                            style: selectedTimeSlots == null ||
+                                    selectedTimeSlots.isEmpty
+                                ? TextStyle(color: Colors.red)
+                                : TextStyle(
+                                    color: const Color.fromARGB(
+                                        255, 50, 116, 53))),
                       ),
                       SizedBox(height: 10),
                       if (calculatedPrice != null)

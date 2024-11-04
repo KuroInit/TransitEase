@@ -11,10 +11,6 @@ void main() {
     fakeFirestore = FakeFirebaseFirestore();
   });
 
-  group('Firebase Data Fetching Tests', () {
-    // (Additional Firebase data fetching tests can be added here)
-  });
-
   group('Data Parsing and Transformation Tests', () {
     test(
         'carparkFromFirestore creates correct Carpark object with complete data',

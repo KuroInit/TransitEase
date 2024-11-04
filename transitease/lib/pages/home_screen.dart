@@ -54,12 +54,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     vehicleType: VehicleType.car,
   );
 
-  // ItemScrollController for scrolling to list items
   final ItemScrollController _itemScrollController = ItemScrollController();
   final ItemPositionsListener _itemPositionsListener =
       ItemPositionsListener.create();
 
-  // Timestamp for the list view data
   DateTime? _listViewDataFetchedTime;
 
   @override
@@ -68,7 +66,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _mapController = MapController();
 
-    // Initialize Firebase instances
     firestore = widget.firestore ?? FirebaseFirestore.instance;
     firebaseAuth = widget.firebaseAuth ?? FirebaseAuth.instance;
 
@@ -218,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         setState(() {
           sortedCarParks = carParksWithinRadius;
-          _listViewDataFetchedTime = DateTime.now(); // Update the timestamp
+          _listViewDataFetchedTime = DateTime.now();
         });
       } catch (e) {
         print("Error while sorting car parks: $e");
@@ -233,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _userLocation.latitude,
       _userLocation.longitude,
       _preferences.radiusDistance,
-      firestore, // Injecting firestore instance
+      firestore,
     );
 
     List<Map<String, dynamic>> newCarParks = nearbyCarParks.map((doc) {
@@ -253,9 +250,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         markers = generateMarkersWithOnTap(
           nearbyCarParks,
           _onMarkerTap,
-          firestore, // Injecting firestore instance
+          firestore,
         );
-        _listViewDataFetchedTime = DateTime.now(); // Update the timestamp
+        _listViewDataFetchedTime = DateTime.now();
       });
     }
   }
@@ -346,8 +343,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _logout() async {
+    await firebaseAuth.signOut();
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => LoginScreen()));
+  }
+
   void _onMarkerTap(String carParkId) {
-    // Find the index of the car park in the sorted list
     int index =
         sortedCarParks.indexWhere((carPark) => carPark['id'] == carParkId);
 
@@ -356,14 +358,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       var decodedLocation = geohash.decode(sortedCarParks[index]['geohash']);
       LatLng carParkLocation = LatLng(decodedLocation[1], decodedLocation[0]);
 
-      // Scroll to the corresponding item and open details screen
       _navigateToCarParkDetails(carParkId, carParkLocation, index);
     }
   }
 
   void _navigateToCarParkDetails(
       String carParkId, LatLng carParkLocation, int index) {
-    // Navigate to the details screen
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -371,24 +371,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           carParkId: carParkId,
           carParkLocation: carParkLocation,
           vehPref: _preferences,
-          firestore: firestore, // Injecting firestore instance
+          firestore: firestore,
         ),
       ),
     );
 
-    // Optionally, center the map on the car park
     _mapController.move(carParkLocation, 18.0);
 
-    // Scroll to the item in the list
     _itemScrollController.scrollTo(
       index: index,
       duration: Duration(milliseconds: 500),
-      alignment: 0.5, // Center the item in the list
+      alignment: 0.5,
     );
   }
 
   Future<void> _refreshListView() async {
-    // Implement any data fetching or refreshing logic here
     _updateMarkers();
     setState(() {
       _listViewDataFetchedTime = DateTime.now();
@@ -540,7 +537,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               String carParkGeohash =
                                   sortedCarParks[index]['geohash'];
 
-                              // Decode the geohash to get latitude and longitude
                               GeoHasher geohash = GeoHasher();
                               var decodedLocation =
                                   geohash.decode(carParkGeohash);
@@ -568,8 +564,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   padding: EdgeInsets.all(10),
                                   child: CarParkDetails(
                                     carParkId: carParkId,
-                                    firestore:
-                                        firestore, // Injecting firestore instance
+                                    firestore: firestore,
                                   ),
                                 ),
                               );
@@ -583,28 +578,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Positioned(
             top: 80,
             left: 20,
-            child: FloatingActionButton(
-              heroTag: "preferencesDrawer",
-              backgroundColor: Colors.white,
-              onPressed: () async {
-                final result = await showModalBottomSheet<Preferences>(
-                  context: context,
-                  builder: (context) => PreferencesMenu(
-                    currentPreferences: _preferences,
-                  ),
-                );
+            child: Column(
+              children: [
+                FloatingActionButton(
+                  heroTag: "logoutButton",
+                  backgroundColor: Colors.red,
+                  onPressed: _logout,
+                  child: Icon(Icons.logout, color: Colors.white),
+                ),
+                SizedBox(height: 8),
+                FloatingActionButton(
+                  heroTag: "preferencesDrawer",
+                  backgroundColor: Colors.white,
+                  onPressed: () async {
+                    final result = await showModalBottomSheet<Preferences>(
+                      context: context,
+                      builder: (context) => PreferencesMenu(
+                        currentPreferences: _preferences,
+                      ),
+                    );
 
-                if (result != null) {
-                  setState(() {
-                    _preferences = result;
-                  });
-
-                  _updateMarkers();
-                  print(
-                      "Updated Preferences: Radius = ${_preferences.radiusDistance}, Vehicle Type = ${_preferences.vehicleType}");
-                }
-              },
-              child: Icon(Icons.settings, color: Colors.black),
+                    if (result != null) {
+                      setState(() {
+                        _preferences = result;
+                      });
+                      _updateMarkers();
+                      print(
+                          "Updated Preferences: Radius = ${_preferences.radiusDistance}, Vehicle Type = ${_preferences.vehicleType}");
+                    }
+                  },
+                  child: Icon(Icons.settings, color: Colors.black),
+                ),
+              ],
             ),
           ),
           Positioned(

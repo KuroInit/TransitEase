@@ -97,16 +97,17 @@ class _CarParkDetailsState extends State<CarParkDetails> {
       longitude = coordinates[0] is num ? coordinates[0].toDouble() : 0;
     }
 
-    final carCapacity = carparkData['vehCat']?['Car']?['parkCapacity'] ?? 0;
-    final motorcycleCapacity =
-        carparkData['vehCat']?['Motorcycle']?['parkCapacity'] ?? 0;
+    // Assign values to the class-level variables
+    carCapacity = carparkData['vehCat']?['Car']?['parkCapacity'] as int? ?? 0;
+    motorcycleCapacity =
+        carparkData['vehCat']?['Motorcycle']?['parkCapacity'] as int? ?? 0;
 
     return Carpark(
       carparkID: carparkData['ppCode'] ?? 'Unavailable',
       name: carparkData['ppName'] ?? 'Unavailable',
       locationCoordinates: LatLng(latitude, longitude),
-      carCapacity: carCapacity,
-      bikeCapacity: motorcycleCapacity,
+      carCapacity: carCapacity ?? 0,
+      bikeCapacity: motorcycleCapacity ?? 0,
       currentOccupancy: 0,
       pricePerHour: 0.0,
       realTimeAvailability: data?.containsKey('availability') ?? false,
@@ -127,7 +128,6 @@ class _CarParkDetailsState extends State<CarParkDetails> {
     String carLotText = carLotsAvailable != null
         ? "$carLotsAvailable  /  $carCapacity"
         : "$carCapacity";
-
     Color motorcycleIconColor =
         motorcycleLotsAvailable != null ? Colors.green : Colors.red;
     String motorcycleLotText = motorcycleLotsAvailable != null
