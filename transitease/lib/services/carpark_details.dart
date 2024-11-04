@@ -3,11 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:transitease/models/models.dart';
+import 'package:meta/meta.dart';
 
 class CarParkDetails extends StatefulWidget {
   final String carParkId;
+  final FirebaseFirestore firestore;
 
-  const CarParkDetails({Key? key, required this.carParkId}) : super(key: key);
+  const CarParkDetails(
+      {Key? key, required this.carParkId, required this.firestore})
+      : super(key: key);
 
   @override
   _CarParkDetailsState createState() => _CarParkDetailsState();
@@ -24,14 +28,14 @@ class _CarParkDetailsState extends State<CarParkDetails> {
   @override
   void initState() {
     super.initState();
-    _fetchCarParkDetails();
+    fetchCarParkDetails();
   }
 
-  Future<void> _fetchCarParkDetails() async {
+  Future<void> fetchCarParkDetails() async {
     print("Fetching data for carParkId: ${widget.carParkId}");
 
     try {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+      DocumentSnapshot snapshot = await widget.firestore
           .collection('car_parks')
           .doc(widget.carParkId)
           .get();
@@ -40,7 +44,7 @@ class _CarParkDetailsState extends State<CarParkDetails> {
         final data = snapshot.data() as Map<String, dynamic>?;
 
         setState(() {
-          carParkData = _carparkFromFirestore(snapshot);
+          carParkData = carparkFromFirestore(snapshot);
 
           if (data != null && data.containsKey('availability')) {
             var availability = data['availability'] as Map<String, dynamic>?;
@@ -67,9 +71,10 @@ class _CarParkDetailsState extends State<CarParkDetails> {
     }
   }
 
-  Carpark _carparkFromFirestore(DocumentSnapshot doc) {
+  Carpark carparkFromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>?;
     var carparkData = data?['carpark'] as Map<String, dynamic>?;
+
     if (carparkData == null) {
       return Carpark(
         carparkID: 'Unavailable',
@@ -86,17 +91,23 @@ class _CarParkDetailsState extends State<CarParkDetails> {
     List<dynamic>? coordinates =
         carparkData['geometries']?['coordinates'] as List<dynamic>?;
 
-    carCapacity = carparkData['vehCat']?['Car']?['parkCapacity'] ?? 0;
-    motorcycleCapacity =
+    double latitude = 0;
+    double longitude = 0;
+    if (coordinates != null && coordinates.length == 2) {
+      latitude = coordinates[1] is num ? coordinates[1].toDouble() : 0;
+      longitude = coordinates[0] is num ? coordinates[0].toDouble() : 0;
+    }
+
+    final carCapacity = carparkData['vehCat']?['Car']?['parkCapacity'] ?? 0;
+    final motorcycleCapacity =
         carparkData['vehCat']?['Motorcycle']?['parkCapacity'] ?? 0;
+
     return Carpark(
       carparkID: carparkData['ppCode'] ?? 'Unavailable',
       name: carparkData['ppName'] ?? 'Unavailable',
-      locationCoordinates: coordinates != null && coordinates.length == 2
-          ? LatLng(coordinates[1], coordinates[0])
-          : LatLng(0, 0),
-      carCapacity: carCapacity ?? 0,
-      bikeCapacity: motorcycleCapacity ?? 0,
+      locationCoordinates: LatLng(latitude, longitude),
+      carCapacity: carCapacity,
+      bikeCapacity: motorcycleCapacity,
       currentOccupancy: 0,
       pricePerHour: 0.0,
       realTimeAvailability: data?.containsKey('availability') ?? false,

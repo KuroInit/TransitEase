@@ -4,8 +4,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_geohash/dart_geohash.dart';
 
-List<Marker> generateMarkersWithOnTap(
-    List<DocumentSnapshot> carParks, Function(String) onTap) {
+List<Marker> generateMarkersWithOnTap(List<DocumentSnapshot> carParks,
+    Function(String) onTap, FirebaseFirestore fire) {
   List<Marker> markers = [];
   for (var doc in carParks) {
     var carParkData = doc['carpark'];

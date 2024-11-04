@@ -9,11 +9,13 @@ class CarParkDetailScreen extends StatefulWidget {
   final String carParkId;
   final LatLng carParkLocation;
   final Preferences vehPref;
+  final FirebaseFirestore firestore;
 
   CarParkDetailScreen({
     required this.carParkLocation,
     required this.carParkId,
     required this.vehPref,
+    required this.firestore,
   });
 
   @override
@@ -75,7 +77,7 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
           ),
           Expanded(
             child: FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance
+              future: widget.firestore
                   .collection('car_parks')
                   .doc(widget.carParkId)
                   .get(),
@@ -123,8 +125,6 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                         children: [
                           ChoiceChip(
                             label: Text('Car'),
-                            color: WidgetStatePropertyAll(
-                                Colors.green.withOpacity(0.2)),
                             selected: isCarSelected,
                             onSelected: (selected) {
                               setState(() {
@@ -136,8 +136,6 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                           SizedBox(width: 8),
                           ChoiceChip(
                             label: Text('Motorcycle'),
-                            color: WidgetStatePropertyAll(
-                                Colors.green.withOpacity(0.2)),
                             selected: !isCarSelected,
                             onSelected: (selected) {
                               setState(() {
@@ -166,16 +164,11 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () => _selectDateTime(context, true),
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  WidgetStatePropertyAll<Color>(Colors.green),
-                            ),
                             child: Text(
                               selectedStartTime == null
                                   ? 'Select Start Time'
                                   : DateFormat('yyyy-MM-dd HH:mm')
                                       .format(selectedStartTime!),
-                              style: TextStyle(color: Colors.white),
                             ),
                           ),
                           SizedBox(height: 8),
@@ -185,16 +178,11 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () => _selectDateTime(context, false),
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  WidgetStatePropertyAll<Color>(Colors.green),
-                            ),
                             child: Text(
                               selectedEndTime == null
                                   ? 'Select End Time'
                                   : DateFormat('yyyy-MM-dd HH:mm')
                                       .format(selectedEndTime!),
-                              style: TextStyle(color: Colors.white),
                             ),
                           ),
                         ],
@@ -205,17 +193,10 @@ class _CarParkDetailScreenState extends State<CarParkDetailScreen> {
                                 selectedTimeSlots.isEmpty
                             ? null
                             : () => _calculatePrice(selectedTimeSlots),
-                        style: ButtonStyle(
-                          backgroundColor: selectedTimeSlots == null ||
-                                  selectedTimeSlots.isEmpty
-                              ? WidgetStatePropertyAll<Color>(Colors.red)
-                              : WidgetStatePropertyAll<Color>(Colors.green),
-                        ),
                         child: Text(
                           selectedTimeSlots == null || selectedTimeSlots.isEmpty
                               ? 'No Slots Available'
                               : "Calculate Cost",
-                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                       SizedBox(height: 10),

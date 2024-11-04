@@ -21,8 +21,14 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class HomeScreen extends StatefulWidget {
   final AppUser user;
+  final FirebaseFirestore? firestore;
+  final FirebaseAuth? firebaseAuth;
 
-  HomeScreen({required this.user});
+  HomeScreen({
+    required this.user,
+    this.firestore,
+    this.firebaseAuth,
+  });
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -31,6 +37,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late MapController _mapController;
+  late FirebaseFirestore firestore;
+  late FirebaseAuth firebaseAuth;
+
   LatLng _userLocation = LatLng(51.509364, -0.128928);
   bool _locationLoaded = false;
   double _currentZoom = 15.0;
@@ -58,6 +67,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _mapController = MapController();
+
+    // Initialize Firebase instances
+    firestore = widget.firestore ?? FirebaseFirestore.instance;
+    firebaseAuth = widget.firebaseAuth ?? FirebaseAuth.instance;
+
     _initializeAppState();
     _startListeningToLocationChanges();
   }
@@ -132,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _fetchAndSaveCarParksFromFirestore() async {
     print("Fetching car parks from Firestore...");
     QuerySnapshot carParksSnapshot =
-        await FirebaseFirestore.instance.collection('car_parks').get();
+        await firestore.collection('car_parks').get();
 
     List<Map<String, dynamic>> carParks = carParksSnapshot.docs.map((doc) {
       var carParkData = doc['carpark'];
@@ -219,6 +233,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _userLocation.latitude,
       _userLocation.longitude,
       _preferences.radiusDistance,
+      firestore, // Injecting firestore instance
     );
 
     List<Map<String, dynamic>> newCarParks = nearbyCarParks.map((doc) {
@@ -235,7 +250,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!_areCarParksEqual(newCarParks, sortedCarParks)) {
       setState(() {
         sortedCarParks = newCarParks;
-        markers = generateMarkersWithOnTap(nearbyCarParks, _onMarkerTap);
+        markers = generateMarkersWithOnTap(
+          nearbyCarParks,
+          _onMarkerTap,
+          firestore, // Injecting firestore instance
+        );
         _listViewDataFetchedTime = DateTime.now(); // Update the timestamp
       });
     }
@@ -298,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _checkAuthState() async {
-    final User? user = FirebaseAuth.instance.currentUser;
+    final User? user = firebaseAuth.currentUser;
     if (user == null) {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => LoginScreen()));
@@ -352,6 +371,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           carParkId: carParkId,
           carParkLocation: carParkLocation,
           vehPref: _preferences,
+          firestore: firestore, // Injecting firestore instance
         ),
       ),
     );
@@ -519,9 +539,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               String carParkId = sortedCarParks[index]['id'];
                               String carParkGeohash =
                                   sortedCarParks[index]['geohash'];
-                              //String carParkName = sortedCarParks[index]
-                              //        ['name'] ??
-                              //    'Unknown Car Park';
 
                               // Decode the geohash to get latitude and longitude
                               GeoHasher geohash = GeoHasher();
@@ -549,7 +566,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     ],
                                   ),
                                   padding: EdgeInsets.all(10),
-                                  child: CarParkDetails(carParkId: carParkId),
+                                  child: CarParkDetails(
+                                    carParkId: carParkId,
+                                    firestore:
+                                        firestore, // Injecting firestore instance
+                                  ),
                                 ),
                               );
                             },

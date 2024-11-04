@@ -13,14 +13,15 @@ List<String> calculateGeohashRange(
 }
 
 Future<List<DocumentSnapshot>> queryGeohashesWithinRadius(
-    double userLat, double userLon, int radius) async {
+    double userLat, double userLon, int radius, FirebaseFirestore fire) async {
   List<String> geohashRange = calculateGeohashRange(userLat, userLon, radius);
   String startGeohash = geohashRange[0];
   String endGeohash = geohashRange[1];
 
   print("Querying geohashes between: $startGeohash and $endGeohash");
 
-  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  // Use the injected FirebaseFirestore instance 'fire' instead of FirebaseFirestore.instance
+  QuerySnapshot querySnapshot = await fire
       .collection('car_parks')
       .where('carpark.geohash', isGreaterThanOrEqualTo: startGeohash)
       .where('carpark.geohash', isLessThanOrEqualTo: endGeohash)
