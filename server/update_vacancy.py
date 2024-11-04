@@ -7,39 +7,31 @@ import os
 import pyproj
 import logging
 
-# Configure logging to output to a log file
 logging.basicConfig(
-    filename="/app/logs/update_vacancy.log",  # Log file location inside Docker container
+    filename="/app/logs/update_vacancy.log",
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env file
 dotenv_path = "/app/.env"
-# Load environment variables from .env file
+
 try:
-    # Attempt to load .env file from the specified path
     if load_dotenv(dotenv_path):
         logger.info(f".env file loaded successfully from {dotenv_path}")
     else:
-        # If load_dotenv returns False, the file was not found or could not be loaded
         logger.warning(f".env file not found or could not be loaded from {dotenv_path}")
 except Exception as e:
-    # Log any unexpected errors during the load attempt
     logger.error(f"Error loading .env file from {dotenv_path}: {e}")
 
-# Read from environment variables
 ACCESS_KEY = os.getenv("URA_ACCESS_KEY")
 TOKEN = os.getenv("URA_TOKEN")
 FIREBASE_CREDENTIALS_JSON = os.getenv("FIREBASE_JSON")
 
-# Initialize Firebase Admin SDK
 cred = credentials.Certificate(FIREBASE_CREDENTIALS_JSON)
 firebase_admin.initialize_app(cred)
-db = firestore.client()  # Create a Firestore client
+db = firestore.client()
 
-# Define SVY21 and WGS84 coordinate systems
 svy21 = pyproj.Proj(
     "+proj=tmerc +lat_0=1.366666 +lon_0=103.833333 +k=1 +x_0=28001.642 +y_0=38744.572 +ellps=WGS84 +units=m +no_defs"
 )
@@ -47,7 +39,6 @@ wgs84 = pyproj.Proj(proj="latlong", datum="WGS84")
 
 
 def fetch_car_park_availability() -> dict:
-    """Fetch car park availability data from the URA API."""
     url = "https://www.ura.gov.sg/uraDataService/invokeUraDS?service=Car_Park_Availability"
     headers = {
         "User-Agent": "curl/8.7.1",
@@ -58,7 +49,7 @@ def fetch_car_park_availability() -> dict:
 
     try:
         response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raise an error for bad responses
+        response.raise_for_status()
         logger.info("Successfully fetched car park availability data.")
         return response.json()
     except requests.RequestException as e:
@@ -67,12 +58,11 @@ def fetch_car_park_availability() -> dict:
 
 
 def update_car_park_availability(data):
-    """Update Firestore car park documents with availability data."""
     car_parks_ref = db.collection("car_parks")
 
     for car_park in data:
-        pp_code = car_park.get("carparkNo")  # This is the ppCode or car park name
-        lots_available = int(car_park.get("lotsAvailable", 0))  # Ensure it's an integer
+        pp_code = car_park.get("carparkNo")
+        lots_available = int(car_park.get("lotsAvailable", 0))
         lot_type = car_park.get("lotType")
 
         if not pp_code:
@@ -80,7 +70,6 @@ def update_car_park_availability(data):
             continue
 
         try:
-            # Update the existing document in the 'car_parks' collection by ppCode
             car_park_doc_ref = car_parks_ref.document(pp_code)
             car_park_doc_ref.update(
                 {
@@ -96,10 +85,8 @@ def update_car_park_availability(data):
             logger.error(f"Error updating carparkNo {pp_code}: {e}")
 
 
-# Main function to execute the script
 if __name__ == "__main__":
     try:
-        # Fetch car park availability data from URA API
         availability_data = fetch_car_park_availability()
         logger.info("Car park availability data fetched from URA API.")
 

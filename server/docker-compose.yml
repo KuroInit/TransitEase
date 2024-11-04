@@ -7,6 +7,6 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - .:/app
-      - ./logs:/app/logs  # Map logs directory for persistence
-      - /Users/kur0/Documents/Year2/sc2006_lab/2006-SDAD-7/server/.env:/app/.env  # Absolute path to .env
+      - ./logs:/app/logs  
+      - ./server/.env:/app/.env
     restart: always
