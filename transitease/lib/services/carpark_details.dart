@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:transitease/models/models.dart';
-import 'package:meta/meta.dart';
 
 class CarParkDetails extends StatefulWidget {
   final String carParkId;
