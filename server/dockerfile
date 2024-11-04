@@ -1,0 +1,28 @@
+# Use a base Python image
+FROM python:3.10-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Update package lists and install cron
+RUN apt-get update && apt-get install -y cron
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy all necessary files into the container
+COPY . .
+
+# Ensure that both `python` and `python3` commands are available (only if `python` does not exist)
+RUN if [ ! -e /usr/local/bin/python ]; then ln -s /usr/local/bin/python3 /usr/local/bin/python; fi
+
+# Copy crontab file for schedule
+COPY crontab /etc/cron.d/scheduled_jobs
+RUN chmod 0644 /etc/cron.d/scheduled_jobs
+
+# Apply the cron job
+RUN crontab /etc/cron.d/scheduled_jobs
+
+# Start cron and keep the container running
+CMD ["cron", "-f"]

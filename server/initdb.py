@@ -9,11 +9,25 @@ import logging
 import geohash2  # Import the geohash library
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename="/app/logs/initdb.log",  # Log file location inside the Docker container
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 logger = logging.getLogger(__name__)
 
+dotenv_path = "/app/.env"
 # Load environment variables from .env file
-load_dotenv()
+try:
+    # Attempt to load .env file from the specified path
+    if load_dotenv(dotenv_path):
+        logger.info(f".env file loaded successfully from {dotenv_path}")
+    else:
+        # If load_dotenv returns False, the file was not found or could not be loaded
+        logger.warning(f".env file not found or could not be loaded from {dotenv_path}")
+except Exception as e:
+    # Log any unexpected errors during the load attempt
+    logger.error(f"Error loading .env file from {dotenv_path}: {e}")
 
 # Read from environment variables
 ACCESS_KEY = os.getenv("URA_ACCESS_KEY")

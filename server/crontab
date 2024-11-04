@@ -1,0 +1,13 @@
+# Test cron job to log a timestamp every minute
+* * * * * echo "Cron job test: $(date)" >> /app/logs/cron_test.log 2>&1
+
+# Run renew_token.py at startup and every 24 hours
+@reboot /usr/local/bin/python3 /app/renew_token.py >> /app/logs/renew_token.log 2>&1
+0 0 * * * /usr/local/bin/python3 /app/renew_token.py >> /app/logs/renew_token.log 2>&1
+
+# Run initdb.py at startup (with a delay) and every 24 hours
+@reboot sleep 60 && /usr/local/bin/python3 /app/initdb.py >> /app/logs/initdb.log 2>&1
+0 0 * * * /usr/local/bin/python3 /app/initdb.py >> /app/logs/initdb.log 2>&1
+
+# Run update_vacancy.py every 10 minutes
+*/10 * * * * /usr/local/bin/python3 /app/update_vacancy.py >> /app/logs/update_vacancy.log 2>&1

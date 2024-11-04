@@ -1,9 +1,29 @@
 import requests
 import os
 from dotenv import load_dotenv
+import logging
+
+# Configure logging
+logging.basicConfig(
+    filename="/app/logs/renew_token.log",  # Log file location inside Docker container
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
-load_dotenv()
+dotenv_path = "/app/.env"
+# Load environment variables from .env file
+try:
+    # Attempt to load .env file from the specified path
+    if load_dotenv(dotenv_path):
+        logger.info(f".env file loaded successfully from {dotenv_path}")
+    else:
+        # If load_dotenv returns False, the file was not found or could not be loaded
+        logger.warning(f".env file not found or could not be loaded from {dotenv_path}")
+except Exception as e:
+    # Log any unexpected errors during the load attempt
+    logger.error(f"Error loading .env file from {dotenv_path}: {e}")
 
 
 def make_request():
@@ -11,8 +31,8 @@ def make_request():
     access_key = os.getenv("URA_ACCESS_KEY")
 
     if not access_key:
-        print("Error: Access key not found in .env file.")
-        return
+        logger.error("Access key not found in .env file.")
+        return None
 
     url = "https://www.ura.gov.sg/uraDataService/insertNewToken.action"
 
@@ -25,29 +45,33 @@ def make_request():
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()  # Raise an exception for HTTP errors
-
-        print("Response Status Code:", response.status_code)
+        logger.info("Request successful with status code: %s", response.status_code)
         return response
 
     except requests.exceptions.RequestException as e:
-        print("An error occurred:", e)
+        logger.error("An error occurred during the request: %s", e)
+        return None
 
 
 def write_to_env_file(token):
-    env_file_path = ".env"
+    try:
+        # Read the .env file contents
+        with open(dotenv_path, "r") as env_file:
+            lines = env_file.readlines()
 
-    # Access the .env file exclusively and then close it after updating
-    with open(env_file_path, "r") as env_file:
-        lines = env_file.readlines()
+        # Write the updated token to the .env file
+        with open(dotenv_path, "w") as env_file:
+            for line in lines:
+                if line.startswith("URA_TOKEN="):
+                    env_file.write(f"URA_TOKEN={token}\n")  # Replace the existing token
+                    logger.info("URA_TOKEN updated in .env file.")
+                else:
+                    env_file.write(line)  # Write other lines as they are
 
-    with open(env_file_path, "w") as env_file:
-        for line in lines:
-            if line.startswith("URA_TOKEN="):
-                env_file.write(f"URA_TOKEN={token}\n")  # Replace the existing token
-            else:
-                env_file.write(line)  # Write other lines as they are
+        logger.info(f".env file updated successfully at {os.path.abspath(dotenv_path)}")
 
-    print(f".env file updated at {os.path.abspath(env_file_path)}")
+    except Exception as e:
+        logger.error(f"Error updating .env file: {e}")
 
 
 if __name__ == "__main__":
@@ -57,4 +81,8 @@ if __name__ == "__main__":
         response_json = response.json()
 
         # Write the new token to the .env file
-        write_to_env_file(response_json["Result"])
+        if "Result" in response_json:
+            write_to_env_file(response_json["Result"])
+            logger.info("New token obtained and written to .env file.")
+        else:
+            logger.warning("No token found in the response.")

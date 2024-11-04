@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  python_app:
+    build: .
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/app
+      - ./logs:/app/logs  # Map logs directory for persistence
+      - /Users/kur0/Documents/Year2/sc2006_lab/2006-SDAD-7/server/.env:/app/.env  # Absolute path to .env
+    restart: always

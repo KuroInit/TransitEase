@@ -7,12 +7,27 @@ import os
 import pyproj
 import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging to output to a log file
+logging.basicConfig(
+    filename="/app/logs/update_vacancy.log",  # Log file location inside Docker container
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
-load_dotenv()
+dotenv_path = "/app/.env"
+# Load environment variables from .env file
+try:
+    # Attempt to load .env file from the specified path
+    if load_dotenv(dotenv_path):
+        logger.info(f".env file loaded successfully from {dotenv_path}")
+    else:
+        # If load_dotenv returns False, the file was not found or could not be loaded
+        logger.warning(f".env file not found or could not be loaded from {dotenv_path}")
+except Exception as e:
+    # Log any unexpected errors during the load attempt
+    logger.error(f"Error loading .env file from {dotenv_path}: {e}")
 
 # Read from environment variables
 ACCESS_KEY = os.getenv("URA_ACCESS_KEY")
@@ -44,6 +59,7 @@ def fetch_car_park_availability() -> dict:
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()  # Raise an error for bad responses
+        logger.info("Successfully fetched car park availability data.")
         return response.json()
     except requests.RequestException as e:
         logger.error(f"Error fetching car park availability data: {e}")
@@ -85,7 +101,6 @@ if __name__ == "__main__":
     try:
         # Fetch car park availability data from URA API
         availability_data = fetch_car_park_availability()
-        print(availability_data)
         logger.info("Car park availability data fetched from URA API.")
 
         if "Result" in availability_data and isinstance(
