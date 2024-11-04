@@ -16,7 +16,7 @@ load_dotenv()
 
 # Read from environment variables
 ACCESS_KEY = os.getenv("URA_ACCESS_KEY")
-TOKEN = "g92azFz7RG6Za5aQzf-2v75765fNf58a7029XA7y346JeKaA2FU+f-1w4Hq1Va-J0a-W0jbc7vk2Y1576e59YRAC7Ka-5N+a02vD"
+TOKEN = os.getenv("URA_TOKEN")
 FIREBASE_CREDENTIALS_JSON = os.getenv("FIREBASE_JSON")
 
 # Initialize Firebase Admin SDK
