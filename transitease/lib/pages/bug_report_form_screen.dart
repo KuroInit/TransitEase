@@ -48,7 +48,6 @@ class _BugReportFormUIState extends State<BugReportFormUI> {
       );
       Navigator.pop(context);
     } catch (e) {
-      print("Error submitting bug report: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Failed to submit bug report. Please try again.')),
