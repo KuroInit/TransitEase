@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:transitease/services/geohash_query.dart';
 
@@ -16,6 +17,8 @@ void main() {
       expect(geohashRange.length, 2);
       expect(geohashRange[0], isNotEmpty);
       expect(geohashRange[1], isNotEmpty);
+
+      print('calculateGeohashRange test passed.');
     });
   });
 
@@ -29,6 +32,8 @@ void main() {
       double distance = haversineDistance(lat1, lon1, lat2, lon2);
 
       expect(distance, closeTo(56, 10));
+
+      print('haversineDistance test (different points) passed.');
     });
 
     test('returns zero when calculating distance between identical points', () {
@@ -38,6 +43,8 @@ void main() {
       double distance = haversineDistance(lat1, lon1, lat1, lon1);
 
       expect(distance, equals(0));
+
+      print('haversineDistance test (identical points) passed.');
     });
   });
 }

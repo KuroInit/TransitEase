@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -46,6 +47,8 @@ void main() {
       expect(carpark.carCapacity, equals(100));
       expect(carpark.bikeCapacity, equals(50));
       expect(carpark.realTimeAvailability, isTrue);
+
+      print('Test for carparkFromFirestore with complete data passed.');
     });
 
     test('carparkFromFirestore handles missing coordinates correctly',
@@ -69,6 +72,8 @@ void main() {
       final carpark = carparkFromFirestore(doc);
 
       expect(carpark.locationCoordinates, equals(LatLng(0, 0)));
+
+      print('Test for carparkFromFirestore with missing coordinates passed.');
     });
 
     test('carparkFromFirestore handles malformed coordinates as null correctly',
@@ -94,6 +99,8 @@ void main() {
       final carpark = carparkFromFirestore(doc);
 
       expect(carpark.locationCoordinates, equals(LatLng(0, 0)));
+
+      print('Test for carparkFromFirestore with malformed coordinates passed.');
     });
 
     test('carparkFromFirestore handles malformed vehicle categories correctly',
@@ -117,6 +124,9 @@ void main() {
 
       expect(carpark.carCapacity, equals(0));
       expect(carpark.bikeCapacity, equals(0));
+
+      print(
+          'Test for carparkFromFirestore with malformed vehicle categories passed.');
     });
   });
 }
