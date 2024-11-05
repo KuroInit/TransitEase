@@ -298,7 +298,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         setState(() {
           _userLocation = LatLng(position.latitude, position.longitude);
           _locationLoaded = true;
-          _mapController.move(_userLocation, _currentZoom);
           _updateMarkers();
         });
       }
