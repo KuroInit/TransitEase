@@ -148,7 +148,7 @@ FIREBASE_JSON=path/to/your/firebase.json
 ## 🧠 Contributors - Team Transitease 🚗
 
 - [Ashwin](https://github.com/KuroInit)
-- [Johnathan](https://github.com/SZMJonathan)
+- [Jonathan](https://github.com/SZMJonathan)
 - [@teammember2](https://github.com/teammember2)
 - [@teammember3](https://github.com/teammember3)
 
