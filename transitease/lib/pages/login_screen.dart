@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 import 'sign_up_screen.dart';
 import 'dart:async';
@@ -30,8 +31,10 @@ class _LoginScreenState extends State<LoginScreen> {
           email: _emailController.text, password: _passwordController.text);
 
       var authToken = await userCredential.user!.getIdToken();
-
       _currentUser = AppUser.fromFirebaseUser(userCredential.user!, authToken);
+
+      // Save the user data
+      await _saveCurrentUser(_currentUser!);
 
       _showProgressNotification('Login successful!', Colors.green);
 
@@ -50,6 +53,35 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _saveCurrentUser(AppUser user) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userID', user.userID);
+    await prefs.setString('authToken', user.authToken);
+    await prefs.setBool('notificationEnabled', user.notificationEnabled);
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userID = prefs.getString('userID');
+    String? authToken = prefs.getString('authToken');
+    bool? notificationEnabled = prefs.getBool('notificationEnabled') ?? false;
+
+    if (userID != null && authToken != null) {
+      setState(() {
+        _currentUser = AppUser(
+            userID: userID,
+            authToken: authToken,
+            notificationEnabled: notificationEnabled);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUser();
+  }
+
   void _showProgressNotification(String message, Color color) {
     setState(() {
       _notificationMessage = message;
@@ -57,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _progressValue = 1.0;
     });
 
-    _timer = Timer.periodic(Duration(milliseconds: 80), (Timer timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 20), (Timer timer) {
       setState(() {
         _progressValue -= 0.02;
         if (_progressValue <= 0.0) {

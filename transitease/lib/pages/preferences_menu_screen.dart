@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:transitease/models/models.dart';
 
 class PreferencesMenu extends StatefulWidget {
   final Preferences currentPreferences;
-
-  PreferencesMenu({required this.currentPreferences});
+  final AppUser user;
+  PreferencesMenu({required this.currentPreferences, required this.user});
 
   @override
   _PreferencesMenuState createState() => _PreferencesMenuState();
@@ -38,9 +40,8 @@ class _PreferencesMenuState extends State<PreferencesMenu> {
     _selectedVehicleType = widget.currentPreferences.vehicleType;
   }
 
-  void _savePreferences() {
+  Future<void> _savePreferences() async {
     int kilometerValue = (_selectedTens * 10) + _selectedOnes;
-
     int radius = _selectedMeter == 5 ? kilometerValue + 1 : kilometerValue;
 
     Preferences preferences = Preferences(
@@ -48,7 +49,30 @@ class _PreferencesMenuState extends State<PreferencesMenu> {
       vehicleType: _selectedVehicleType,
     );
 
-    Navigator.pop(context, preferences);
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await FirebaseFirestore.instance
+            .collection('user_preferences')
+            .doc(widget.user.userID)
+            .set({
+          'radiusDistance': preferences.radiusDistance,
+          'preferredVehicle':
+              preferences.vehicleType.toString().split('.').last,
+        });
+
+        Navigator.pop(context, preferences);
+      } else {
+        throw Exception('User not authenticated');
+      }
+    } catch (e) {
+      print('Failed to save preferences: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save preferences: $e'),
+        ),
+      );
+    }
   }
 
   @override

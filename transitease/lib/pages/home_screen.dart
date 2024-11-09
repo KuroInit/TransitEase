@@ -42,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   LatLng _userLocation = LatLng(51.509364, -0.128928);
   bool _locationLoaded = false;
+  bool _mapInitiallyCentered = false;
   double _currentZoom = 15.0;
   List<Marker> markers = [];
   List<Map<String, dynamic>> sortedCarParks = [];
@@ -99,9 +100,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         await _checkForNewCarParks();
       }
 
+      await _fetchUserPreferences();
+
       await _loadCarParks();
     } catch (e) {
       print("Error initializing app state: $e");
+    }
+  }
+
+  Future<void> _fetchUserPreferences() async {
+    try {
+      DocumentSnapshot userPreferencesDoc = await firestore
+          .collection('user_preferences')
+          .doc(widget.user.userID)
+          .get();
+      if (userPreferencesDoc.exists) {
+        Map<String, dynamic> data =
+            userPreferencesDoc.data() as Map<String, dynamic>;
+        setState(() {
+          _preferences = Preferences(
+            radiusDistance: data['radiusDistance'] ?? 1000,
+            vehicleType: data['preferredVehicle'] == 'car'
+                ? VehicleType.car
+                : VehicleType.bike,
+          );
+        });
+        print(
+            "User preferences loaded: Radius = ${_preferences.radiusDistance}, Vehicle Type = ${_preferences.vehicleType}");
+      } else {
+        print("No user preferences found. Using default preferences.");
+      }
+    } catch (e) {
+      print("Error fetching user preferences: $e");
     }
   }
 
@@ -270,38 +300,53 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _startListeningToLocationChanges() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    if (!await Geolocator.isLocationServiceEnabled()) {
-      print("Location services are disabled");
-      return;
-    }
-
-    _positionStreamSubscription = Geolocator.getPositionStream(
-      locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 500,
-      ),
-    ).listen((Position position) {
-      double distance = haversineDistance(
-        _userLocation.latitude,
-        _userLocation.longitude,
-        position.latitude,
-        position.longitude,
-      );
-
-      if (distance >= 0.5) {
-        setState(() {
-          _userLocation = LatLng(position.latitude, position.longitude);
-          _locationLoaded = true;
-          _updateMarkers();
-        });
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied ||
+            permission == LocationPermission.deniedForever) {
+          print("Location permissions are denied.");
+          return;
+        }
       }
-    });
+
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        print("Location services are disabled");
+        return;
+      }
+
+      _positionStreamSubscription = Geolocator.getPositionStream(
+        locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 500,
+        ),
+      ).listen((Position position) {
+        double distance = haversineDistance(
+          _userLocation.latitude,
+          _userLocation.longitude,
+          position.latitude,
+          position.longitude,
+        );
+
+        if (distance >= 0.5) {
+          setState(() {
+            _userLocation = LatLng(position.latitude, position.longitude);
+            _locationLoaded = true;
+          });
+
+          if (!_mapInitiallyCentered && _locationLoaded) {
+            _mapController.move(_userLocation, _currentZoom);
+            _mapInitiallyCentered = true;
+          }
+
+          _updateMarkers();
+        }
+      });
+    } catch (e) {
+      print("Error starting location changes: $e");
+    }
   }
 
   Future<void> _trackingPermission() async {
@@ -325,14 +370,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _zoomIn() {
     setState(() {
       _currentZoom += 1;
-      _mapController.move(_userLocation, _currentZoom);
+      _mapController.move(_mapController.camera.center, _currentZoom);
     });
   }
 
   void _zoomOut() {
     setState(() {
       _currentZoom -= 1;
-      _mapController.move(_userLocation, _currentZoom);
+      _mapController.move(_mapController.camera.center, _currentZoom);
     });
   }
 
@@ -593,6 +638,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     final result = await showModalBottomSheet<Preferences>(
                       context: context,
                       builder: (context) => PreferencesMenu(
+                        user: widget.user,
                         currentPreferences: _preferences,
                       ),
                     );
