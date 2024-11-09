@@ -160,7 +160,7 @@ FIREBASE_JSON=path/to/your/firebase.json
 - [Geolocator Package](https://pub.dev/packages/geolocator)
 - [Google Cloud Services](https://cloud.google.com/docs)
 - [Docker Documentation](https://docs.docker.com/)
-- [Cron Job Scheduling Guide](https://crontab.guru/)
+- [Cron Job Scheduling Guide](https://cronitor.io/guides/cron-jobs)
 - [URA Carpark API](https://www.ura.gov.sg/maps/api/)
 
 ## 📽 Demo Video
