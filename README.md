@@ -149,8 +149,8 @@ FIREBASE_JSON=path/to/your/firebase.json
 
 - [Ashwin](https://github.com/KuroInit)
 - [Jonathan](https://github.com/SZMJonathan)
-- [@teammember2](https://github.com/teammember2)
-- [@teammember3](https://github.com/teammember3)
+- [Dave](https://github.com/DaveG0h)
+- [Jun Heng](https://github.com/SpiderKing51094)
 
 ## 📖 References
 
