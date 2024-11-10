@@ -117,102 +117,104 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.green,
       body: Stack(
         children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'Assets/Icon Creator Online.png',
-                    height: 300,
-                    width: 300,
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
+          SingleChildScrollView(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'Assets/Icon Creator Online.png',
+                      height: 300,
+                      width: 300,
                     ),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
+                    SizedBox(height: 20),
+                    TextField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
+                      style: TextStyle(color: Colors.white),
                     ),
-                    obscureText: true,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 20),
-                  _loading
-                      ? CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: _loginWithEmail,
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                            backgroundColor: Colors.white,
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                      ),
+                      obscureText: true,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    SizedBox(height: 20),
+                    _loading
+                        ? CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: _loginWithEmail,
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.green,
+                              backgroundColor: Colors.white,
+                            ),
+                            child: Text('Login'),
                           ),
-                          child: Text('Login'),
-                        ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Divider(
-                          color: Colors.white,
-                          thickness: 1,
-                        ),
-                      ),
-                      Text(
-                        " OR ",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: Colors.white,
-                          thickness: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SignUpScreen()));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                            backgroundColor: Colors.white,
+                    SizedBox(height: 20),
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Divider(
+                            color: Colors.white,
+                            thickness: 1,
                           ),
-                          child: Text('Sign up'),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        Text(
+                          " OR ",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: Colors.white,
+                            thickness: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SignUpScreen()));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.green,
+                              backgroundColor: Colors.white,
+                            ),
+                            child: Text('Sign up'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

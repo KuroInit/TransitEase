@@ -19,7 +19,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _notificationMessage = "";
   double _progressValue = 1.0;
   Timer? _timer;
-
+  Color color = Colors.green;
   bool _hasUppercase = false;
   bool _hasUniqueCharacter = false;
   bool _passwordsMatch = false;
@@ -68,6 +68,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _notificationMessage = message;
       _showNotification = true;
       _progressValue = 1.0;
+      color = color;
     });
 
     _timer = Timer.periodic(Duration(milliseconds: 50), (Timer timer) {
@@ -141,106 +142,108 @@ class _SignUpScreenState extends State<SignUpScreen> {
       body: Stack(
         children: [
           Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
+                      style: TextStyle(color: Colors.white),
                     ),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _passwordController,
-                    onChanged: _validatePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _passwordController,
+                      onChanged: _validatePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
+                      obscureText: true,
+                      style: TextStyle(color: Colors.white),
                     ),
-                    obscureText: true,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _confirmPasswordController,
-                    onChanged: (value) =>
-                        _validatePassword(_passwordController.text),
-                    decoration: InputDecoration(
-                      labelText: 'Confirm Password',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _confirmPasswordController,
+                      onChanged: (value) =>
+                          _validatePassword(_passwordController.text),
+                      decoration: InputDecoration(
+                        labelText: 'Confirm Password',
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
+                      obscureText: true,
+                      style: TextStyle(color: Colors.white),
                     ),
-                    obscureText: true,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 10),
-                  _buildPasswordChecklist(),
-                  SizedBox(height: 20),
-                  _loading
-                      ? CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: _signUp,
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                            backgroundColor: Colors.white,
+                    SizedBox(height: 10),
+                    _buildPasswordChecklist(),
+                    SizedBox(height: 20),
+                    _loading
+                        ? CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: _signUp,
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.green,
+                              backgroundColor: Colors.white,
+                            ),
+                            child: Text('Sign up'),
                           ),
-                          child: Text('Sign up'),
+                    SizedBox(height: 20),
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Divider(
+                            color: Colors.white,
+                            thickness: 1,
+                          ),
                         ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Divider(
-                          color: Colors.white,
-                          thickness: 1,
+                        Text(
+                          " OR ",
+                          style: TextStyle(color: Colors.white),
                         ),
-                      ),
-                      Text(
-                        " OR ",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: Colors.white,
-                          thickness: 1,
+                        Expanded(
+                          child: Divider(
+                            color: Colors.white,
+                            thickness: 1,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.green,
-                      backgroundColor: Colors.white,
+                      ],
                     ),
-                    child: Text('Back to Login'),
-                  ),
-                ],
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.green,
+                        backgroundColor: Colors.white,
+                      ),
+                      child: Text('Back to Login'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -266,7 +269,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     LinearProgressIndicator(
                       value: _progressValue,
                       backgroundColor: Colors.grey[300],
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
                     ),
                   ],
                 ),
