@@ -165,7 +165,7 @@ FIREBASE_JSON=path/to/your/firebase.json
 
 ## 📽 Demo Video
 
-Watch the demo of the car park app in action: [Car Park App Demo](https://www.youtube.com/your-demo-link)
+Watch the demo of the car park app in action: [Car Park App Demo](https://youtu.be/ObQ-a3emdXw)
 
 ## 🔐 License
 
