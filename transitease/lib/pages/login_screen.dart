@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   bool _showNotification = false;
   String _notificationMessage = "";
+  Color _notificationColor = Colors.green;
   double _progressValue = 1.0;
   Timer? _timer;
   AppUser? _currentUser;
@@ -45,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 builder: (context) => HomeScreen(user: _currentUser!)));
       });
     } catch (e) {
-      _showProgressNotification('Login failed: $e', Colors.red);
+      _showProgressNotification('Login failed: Wrong Credentials', Colors.red);
     } finally {
       setState(() {
         _loading = false;
@@ -86,6 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _notificationMessage = message;
       _showNotification = true;
+      _notificationColor = color;
       _progressValue = 1.0;
     });
 
@@ -236,7 +238,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     LinearProgressIndicator(
                       value: _progressValue,
                       backgroundColor: Colors.grey[300],
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(_notificationColor),
                     ),
                   ],
                 ),
